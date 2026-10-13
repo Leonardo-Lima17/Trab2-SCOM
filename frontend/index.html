@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineArquivo — Meu catálogo pessoal de filmes</title>
+  <meta
+    name="description"
+    content="Catálogo pessoal de filmes assistidos e para assistir, com busca e filtros por gênero, status e avaliação."
+  />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <a class="pular-para-conteudo" href="#conteudo-principal"
+    >Pular para o conteúdo</a
+  >
+
+  <header class="cabecalho">
+    <div class="cabecalho__conteudo">
+      <a class="marca" href="#conteudo-principal">
+        <span class="marca__titulo">Cine<span>Arquivo</span></span>
+      </a>
+      <nav class="nav-principal" aria-label="Navegação principal">
+        <ul>
+          <li><a href="#conteudo-principal" aria-current="page">Catálogo</a></li>
+          <li><a href="#sobre">Sobre</a></li>
+        </ul>
+      </nav>
+      <div class="area-conta">
+        <span id="usuario-logado-nome" class="usuario-logado-nome" hidden></span>
+        <button type="button" id="botao-adicionar-filme" class="botao botao--primario botao--header" hidden>
+          + Adicionar filme
+        </button>
+        <button type="button" id="botao-abrir-login" class="botao botao--header">
+          Entrar
+        </button>
+        <button type="button" id="botao-logout" class="botao botao--header" hidden>
+          Sair
+        </button>
+      </div>
+    </div>
+  </header>
+  <div class="faixa-pelicula" role="presentation"></div>
+
+  <section class="hero" aria-labelledby="hero-titulo">
+    <h1 id="hero-titulo">Meu catálogo pessoal de filmes</h1>
+    <p>
+      Uma lista organizada dos filmes que já assisti e dos que ainda quero
+      ver, com busca por título ou diretor e filtros por gênero, status e
+      avaliação.
+    </p>
+  </section>
+
+  <main id="conteudo-principal" class="layout-principal">
+    <aside class="painel-filtros" aria-labelledby="filtros-titulo">
+      <h2 id="filtros-titulo">Filtros</h2>
+      <form id="form-filtros">
+        <div class="campo">
+          <label for="campo-busca">Buscar por título ou diretor</label>
+          <input
+            type="text"
+            id="campo-busca"
+            name="busca"
+            placeholder="Ex.: Nolan, Duna..."
+            autocomplete="off"
+          />
+        </div>
+
+        <fieldset class="campo">
+          <legend>Gênero</legend>
+          <ul id="lista-generos"></ul>
+        </fieldset>
+
+        <fieldset class="campo">
+          <legend>Status</legend>
+          <div class="filtro-status-item">
+            <input
+              type="radio"
+              id="status-todos"
+              name="status"
+              value="todos"
+              class="filtro-radio"
+              checked
+            />
+            <label for="status-todos">Todos</label>
+          </div>
+          <div class="filtro-status-item">
+            <input
+              type="radio"
+              id="status-assistido"
+              name="status"
+              value="assistido"
+              class="filtro-radio"
+            />
+            <label for="status-assistido">Assistidos</label>
+          </div>
+          <div class="filtro-status-item">
+            <input
+              type="radio"
+              id="status-pendente"
+              name="status"
+              value="quero-assistir"
+              class="filtro-radio"
+            />
+            <label for="status-pendente">Quero assistir</label>
+          </div>
+        </fieldset>
+
+        <div class="campo">
+          <label for="campo-ordenar">Ordenar por</label>
+          <select id="campo-ordenar" name="ordenar">
+            <option value="titulo-asc">Título (A–Z)</option>
+            <option value="ano-desc">Ano (mais recente)</option>
+            <option value="ano-asc">Ano (mais antigo)</option>
+            <option value="nota-desc">Avaliação (maior nota)</option>
+          </select>
+        </div>
+
+        <button type="button" id="botao-limpar-filtros" class="botao">
+          Limpar filtros
+        </button>
+      </form>
+    </aside>
+
+    <section aria-labelledby="catalogo-titulo">
+      <div class="conteudo-catalogo__cabecalho">
+        <h2 id="catalogo-titulo">Filmes</h2>
+        <p id="contador-resultados" aria-live="polite"></p>
+      </div>
+
+      <ul id="grade-filmes" class="grade-filmes" aria-live="polite"></ul>
+
+      <div id="estado-vazio" class="estado-vazio" hidden>
+        <strong>Nenhum filme encontrado</strong>
+        Tente ajustar a busca ou remover alguns filtros.
+      </div>
+            <nav id="paginacao" class="paginacao" aria-label="Paginação do catálogo" hidden>
+        <button type="button" id="botao-pagina-anterior" class="botao">Anterior</button>
+        <span id="info-pagina" aria-live="polite"></span>
+        <button type="button" id="botao-pagina-proxima" class="botao">Próxima</button>
+      </nav>
+    </section>
+  </main>
+
+  <section id="recomendacoes" class="hero secao-recomendacoes" aria-labelledby="recomendacoes-titulo" hidden>
+    <h2 id="recomendacoes-titulo">Recomendados para você</h2>
+    <p>
+      Sugestões baseadas nos filmes que você avaliou bem e no que outras pessoas
+      do CineArquivo estão assistindo. Clique para adicionar à sua lista.
+    </p>
+    <ul id="lista-recomendacoes" class="grade-filmes grade-recomendacoes"></ul>
+  </section>
+
+  <section id="sobre" class="hero" aria-labelledby="sobre-titulo">
+    <h2 id="sobre-titulo">Sobre este catálogo</h2>
+    <p>
+      Este projeto foi desenvolvido como trabalho individual da disciplina
+      SCOM, com o objetivo de aplicar boas práticas de estrutura semântica,
+      responsividade, acessibilidade e desempenho em uma interface web
+      construída com HTML5 e CSS3 puros.
+    </p>
+  </section>
+
+  <footer class="rodape">
+    <div class="rodape__conteudo">
+      <span>CineArquivo — projeto acadêmico, SCOM 2026.</span>
+      <span class="rodape__tmdb">
+        Pôsteres e dados de filmes:
+        <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">TMDB</a>.
+        Este produto usa a API do TMDB, mas não é endossado nem certificado por ele.
+      </span>
+      <a href="#conteudo-principal">Voltar ao topo</a>
+    </div>
+  </footer>
+
+  <!-- Modal de detalhes do filme -->
+  <dialog id="modal-detalhe" aria-labelledby="modal-titulo">
+    <button
+      type="button"
+      id="modal-fechar"
+      class="modal-fechar"
+      aria-label="Fechar detalhes do filme"
+    >
+      &times;
+    </button>
+    <div id="modal-conteudo"></div>
+  </dialog>
+
+  <!-- Modal de login / criação de conta -->
+  <dialog id="modal-auth" aria-labelledby="modal-auth-titulo">
+    <button
+      type="button"
+      id="botao-fechar-auth"
+      class="modal-fechar"
+      aria-label="Fechar formulário de login"
+    >
+      &times;
+    </button>
+    <h2 id="modal-auth-titulo">Entrar no CineArquivo</h2>
+
+    <div class="abas-auth" role="tablist">
+      <button type="button" id="aba-login" class="aba-auth aba-auth--ativa" role="tab" aria-selected="true">
+        Entrar
+      </button>
+      <button type="button" id="aba-registrar" class="aba-auth" role="tab" aria-selected="false">
+        Criar conta
+      </button>
+    </div>
+
+    <form id="form-login">
+      <div class="campo">
+        <label for="login-email">E-mail</label>
+        <input type="email" id="login-email" name="email" required autocomplete="username" />
+      </div>
+      <div class="campo">
+        <label for="login-senha">Senha</label>
+        <input type="password" id="login-senha" name="senha" required autocomplete="current-password" />
+      </div>
+      <p id="mensagem-login" class="mensagem-form" aria-live="polite"></p>
+      <button type="submit" class="botao botao--primario">Entrar</button>
+    </form>
+
+    <form id="form-registrar" hidden>
+      <div class="campo">
+        <label for="registrar-nome">Nome</label>
+        <input type="text" id="registrar-nome" name="nome" required />
+      </div>
+      <div class="campo">
+        <label for="registrar-email">E-mail</label>
+        <input type="email" id="registrar-email" name="email" required autocomplete="username" />
+      </div>
+      <div class="campo">
+        <label for="registrar-senha">Senha (mín. 8 caracteres)</label>
+        <input type="password" id="registrar-senha" name="senha" required minlength="8" autocomplete="new-password" />
+      </div>
+      <p id="mensagem-registrar" class="mensagem-form" aria-live="polite"></p>
+      <button type="submit" class="botao botao--primario">Criar conta</button>
+    </form>
+  </dialog>
+
+  <!-- Aviso exibido quando o visitante ainda não está logado -->
+  <div id="aviso-login" class="estado-vazio" hidden>
+    <strong>Faça login para ver seu catálogo</strong>
+    Entre ou crie uma conta gratuita para começar a organizar seus filmes.
+  </div>
+
+  <!-- Template reutilizado pelo JavaScript para renderizar cada card -->
+  <template id="template-card-filme">
+    <li>
+      <article class="card-filme">
+        <figure style="margin: 0">
+          <div class="card-filme__poster" aria-hidden="false"></div>
+          <figcaption>
+            <h3 class="card-filme__titulo"></h3>
+            <p class="card-filme__meta"></p>
+            <div class="card-filme__badges">
+              <span class="card-filme__badge"></span>
+              <span
+                class="card-filme__badge card-filme__badge-personalizado"
+                hidden
+                >Adicionado por você</span
+              >
+            </div>
+            <button type="button" class="botao card-filme__botao">
+              Ver detalhes
+            </button>
+          </figcaption>
+        </figure>
+      </article>
+    </li>
+  </template>
+
+  <!-- Template dos cards de recomendação -->
+  <template id="template-card-recomendacao">
+    <li>
+      <article class="card-filme">
+        <figure style="margin: 0">
+          <div class="card-filme__poster"></div>
+          <figcaption>
+            <h3 class="card-filme__titulo"></h3>
+            <p class="card-filme__meta"></p>
+            <p class="card-filme__motivo"></p>
+            <button type="button" class="botao botao--primario card-filme__botao">
+              Adicionar à minha lista
+            </button>
+          </figcaption>
+        </figure>
+      </article>
+    </li>
+  </template>
+
+  <!-- Modal para adicionar um novo filme (salvo no localStorage) -->
+  <dialog id="modal-adicionar" aria-labelledby="modal-adicionar-titulo">
+    <button
+      type="button"
+      id="botao-cancelar-adicionar"
+      class="modal-fechar"
+      aria-label="Fechar formulário de novo filme"
+    >
+      &times;
+    </button>
+    <h2 id="modal-adicionar-titulo">Adicionar filme à minha lista</h2>
+    <p class="modal-aviso">
+      Este filme fica salvo apenas neste navegador (armazenamento local do
+      dispositivo).
+    </p>
+
+    <form id="form-adicionar">
+      <div class="campo">
+        <label for="busca-tmdb">Buscar pôster e dados do filme (opcional)</label>
+        <div class="busca-tmdb">
+          <input type="text" id="busca-tmdb" placeholder="Digite o título e clique em Buscar" autocomplete="off" />
+          <button type="button" id="botao-buscar-tmdb" class="botao">Buscar</button>
+        </div>
+        <ul id="resultados-tmdb" class="resultados-tmdb" hidden></ul>
+        <p id="mensagem-tmdb" class="mensagem-form" aria-live="polite"></p>
+      </div>
+
+      <div class="campo">
+        <label for="novo-titulo">Título *</label>
+        <input type="text" id="novo-titulo" name="titulo" required />
+      </div>
+
+      <div class="campo-linha">
+        <div class="campo">
+          <label for="novo-ano">Ano</label>
+          <input type="number" id="novo-ano" name="ano" min="1900" max="2100" />
+        </div>
+        <div class="campo">
+          <label for="novo-duracao">Duração (min)</label>
+          <input type="number" id="novo-duracao" name="duracao" min="1" />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="novo-diretor">Diretor(a)</label>
+        <input type="text" id="novo-diretor" name="diretor" />
+      </div>
+
+      <fieldset class="campo">
+        <legend>Gêneros (selecione ao menos um)</legend>
+        <ul id="lista-generos-form"></ul>
+      </fieldset>
+
+      <fieldset class="campo">
+        <legend>Status</legend>
+        <div class="filtro-status-item">
+          <input
+            type="radio"
+            id="novo-status-assistido"
+            name="status-novo"
+            value="assistido"
+            class="filtro-radio"
+            checked
+          />
+          <label for="novo-status-assistido">Já assisti</label>
+        </div>
+        <div class="filtro-status-item">
+          <input
+            type="radio"
+            id="novo-status-pendente"
+            name="status-novo"
+            value="quero-assistir"
+            class="filtro-radio"
+          />
+          <label for="novo-status-pendente">Quero assistir</label>
+        </div>
+      </fieldset>
+
+      <div class="campo">
+        <label for="novo-nota">Minha avaliação (0 a 5)</label>
+        <select id="novo-nota" name="nota">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="novo-sinopse">Sinopse (opcional)</label>
+        <textarea id="novo-sinopse" name="sinopse" rows="3"></textarea>
+      </div>
+
+      <div class="campo">
+        <label for="novo-poster">URL do pôster (https://…, opcional)</label>
+        <input type="url" id="novo-poster" name="poster_url" placeholder="Preenchida pela busca ou automaticamente ao salvar" />
+      </div>
+      <input type="hidden" id="novo-tmdb-id" name="tmdb_id" />
+
+      <p id="mensagem-adicionar" class="mensagem-form" aria-live="polite"></p>
+
+      <button type="submit" class="botao botao--primario">
+        Salvar filme
+      </button>
+    </form>
+  </dialog>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

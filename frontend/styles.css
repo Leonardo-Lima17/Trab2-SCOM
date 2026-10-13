@@ -1,0 +1,891 @@
+/* =========================================================
+   CATÁLOGO DE FILMES — styles.css
+   Tokens de design centralizados em :root (custom properties)
+   ========================================================= */
+
+:root {
+  /* Cores */
+  --cor-fundo: #14161f;
+  --cor-superficie: #1c2030;
+  --cor-superficie-2: #262b3f;
+  --cor-borda: #333952;
+  --cor-texto: #f2efe6;
+  --cor-texto-muted: #a3a8bb;
+  --cor-acento: #e8b64c;      /* dourado "marquise" */
+  --cor-acento-2: #c1443c;    /* vermelho ingresso */
+  --cor-foco: #7fd4ff;
+
+  /* Tipografia */
+  --fonte-display: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --fonte-corpo: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  --fonte-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
+
+  /* Espaçamento e forma */
+  --espaco-1: 0.5rem;
+  --espaco-2: 1rem;
+  --espaco-3: 1.5rem;
+  --espaco-4: 2.5rem;
+  --raio: 10px;
+  --raio-pequeno: 6px;
+
+  /* Layout */
+  --largura-max: 1200px;
+  --sombra: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================================
+   Reset básico
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+img,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--cor-acento);
+}
+
+/* =========================================================
+   Foco visível (acessibilidade — WCAG 2.2 AA)
+   ========================================================= */
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+  border-radius: var(--raio-pequeno);
+}
+
+.pular-para-conteudo {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--cor-acento);
+  color: #14161f;
+  padding: var(--espaco-1) var(--espaco-2);
+  z-index: 100;
+  font-weight: 700;
+  border-radius: 0 0 var(--raio-pequeno) 0;
+}
+
+.pular-para-conteudo:focus {
+  left: 0;
+}
+
+/* =========================================================
+   Cabeçalho / navegação
+   ========================================================= */
+
+.cabecalho {
+  background: linear-gradient(180deg, #1a1d2b 0%, var(--cor-fundo) 100%);
+  border-bottom: 1px solid var(--cor-borda);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.cabecalho__conteudo {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--espaco-2) var(--espaco-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  flex-wrap: wrap;
+}
+
+.marca {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+
+.marca__titulo {
+  font-family: var(--fonte-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 1.5rem;
+  color: var(--cor-texto);
+}
+
+.marca__titulo span {
+  color: var(--cor-acento);
+}
+
+.marca__subtitulo {
+  font-family: var(--fonte-mono);
+  font-size: 0.7rem;
+  color: var(--cor-texto-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.nav-principal ul {
+  list-style: none;
+  display: flex;
+  gap: var(--espaco-3);
+  margin: 0;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.nav-principal a {
+  text-decoration: none;
+  color: var(--cor-texto-muted);
+  padding: 0.3rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-principal a:hover,
+.nav-principal a[aria-current="page"] {
+  color: var(--cor-texto);
+  border-bottom-color: var(--cor-acento);
+}
+
+/* Faixa "película" — elemento de assinatura visual */
+.faixa-pelicula {
+  height: 10px;
+  background-image: radial-gradient(
+    circle,
+    var(--cor-fundo) 2.5px,
+    var(--cor-superficie-2) 2.6px
+  );
+  background-size: 16px 16px;
+  background-position: center;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+/* =========================================================
+   Hero / introdução
+   ========================================================= */
+
+.hero {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--espaco-4) var(--espaco-3) var(--espaco-2);
+}
+
+.hero h1 {
+  font-family: var(--fonte-display);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 var(--espaco-1);
+}
+
+.hero p {
+  color: var(--cor-texto-muted);
+  max-width: 60ch;
+  margin: 0;
+}
+
+/* =========================================================
+   Layout principal (aside + grade)
+   ========================================================= */
+
+.layout-principal {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 var(--espaco-3) var(--espaco-4);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--espaco-3);
+}
+
+@media (min-width: 900px) {
+  .layout-principal {
+    grid-template-columns: 260px 1fr;
+    align-items: start;
+  }
+}
+
+/* ---- Filtros (aside) ---- */
+
+.painel-filtros {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-3);
+  position: static;
+}
+
+@media (min-width: 900px) {
+  .painel-filtros {
+    position: sticky;
+    top: 5.5rem;
+  }
+}
+
+.painel-filtros h2 {
+  font-family: var(--fonte-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1.1rem;
+  margin: 0 0 var(--espaco-2);
+  padding-bottom: var(--espaco-1);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.campo {
+  margin-bottom: var(--espaco-3);
+}
+
+.campo label,
+.campo legend {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.4rem;
+  color: var(--cor-texto-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.campo input[type="text"],
+.campo select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  font-size: 1rem;
+}
+
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 var(--espaco-3);
+}
+
+.filtro-genero-item,
+.filtro-status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.filtro-genero-item label,
+.filtro-status-item label {
+  text-transform: none;
+  font-weight: 400;
+  font-size: 0.95rem;
+  color: var(--cor-texto);
+  margin: 0;
+}
+
+#lista-generos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.filtro-checkbox,
+.filtro-radio {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--cor-acento);
+}
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--raio-pequeno);
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-superficie-2);
+  color: var(--cor-texto);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  width: 100%;
+}
+
+.botao:hover {
+  background: var(--cor-borda);
+}
+
+.botao:active {
+  transform: scale(0.98);
+}
+
+.botao--primario {
+  background: var(--cor-acento);
+  color: #1a1500;
+  border-color: var(--cor-acento);
+  font-weight: 700;
+}
+
+.botao--primario:hover {
+  background: #f2c565;
+}
+
+/* ---- Conteúdo / grade de filmes ---- */
+
+.conteudo-catalogo__cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  margin-bottom: var(--espaco-2);
+  flex-wrap: wrap;
+}
+
+.conteudo-catalogo__cabecalho h2 {
+  font-family: var(--fonte-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+#contador-resultados {
+  font-family: var(--fonte-mono);
+  font-size: 0.85rem;
+  color: var(--cor-texto-muted);
+}
+
+.grade-filmes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--espaco-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 600px) {
+  .grade-filmes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1100px) {
+  .grade-filmes {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card-filme {
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--sombra);
+}
+
+.card-filme__poster {
+  --cor-poster: #333952;
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(
+    160deg,
+    var(--cor-poster) 0%,
+    color-mix(in srgb, var(--cor-poster) 55%, black) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--fonte-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.05em;
+}
+
+.card-filme figcaption {
+  padding: var(--espaco-2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-grow: 1;
+}
+
+.card-filme__titulo {
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.card-filme__meta {
+  font-size: 0.8rem;
+  color: var(--cor-texto-muted);
+  margin: 0;
+}
+
+.card-filme__badge {
+  align-self: flex-start;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-family: var(--fonte-mono);
+}
+
+.card-filme__badge--assistido {
+  background: color-mix(in srgb, var(--cor-acento) 20%, transparent);
+  color: var(--cor-acento);
+  border: 1px solid color-mix(in srgb, var(--cor-acento) 50%, transparent);
+}
+
+.card-filme__badge--pendente {
+  background: color-mix(in srgb, var(--cor-acento-2) 20%, transparent);
+  color: #ff8b80;
+  border: 1px solid color-mix(in srgb, var(--cor-acento-2) 50%, transparent);
+}
+
+.card-filme__botao {
+  margin-top: auto;
+}
+
+.estado-vazio {
+  text-align: center;
+  padding: var(--espaco-4) var(--espaco-2);
+  color: var(--cor-texto-muted);
+  border: 1px dashed var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.estado-vazio strong {
+  display: block;
+  color: var(--cor-texto);
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+/* =========================================================
+   Modal de detalhe
+   ========================================================= */
+
+dialog#modal-detalhe {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-3);
+  max-width: 560px;
+  width: 90vw;
+  box-shadow: var(--sombra);
+}
+
+dialog#modal-detalhe::backdrop {
+  background: rgba(10, 10, 15, 0.7);
+}
+
+.modal-fechar {
+  float: right;
+  background: transparent;
+  border: none;
+  color: var(--cor-texto-muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+}
+
+#modal-conteudo h2 {
+  font-family: var(--fonte-display);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.4rem;
+  padding-right: 2rem;
+}
+
+.modal-meta {
+  font-family: var(--fonte-mono);
+  font-size: 0.85rem;
+  color: var(--cor-texto-muted);
+  margin: 0 0 var(--espaco-2);
+}
+
+.modal-generos,
+.modal-sinopse,
+.modal-status {
+  margin: 0 0 var(--espaco-2);
+}
+
+.botao--header {
+  width: auto;
+  white-space: nowrap;
+}
+
+.card-filme__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.card-filme__badge-personalizado {
+  background: color-mix(in srgb, var(--cor-foco) 20%, transparent);
+  color: var(--cor-foco);
+  border: 1px solid color-mix(in srgb, var(--cor-foco) 50%, transparent);
+}
+
+.modal-aviso {
+  font-size: 0.85rem;
+  color: var(--cor-texto-muted);
+  margin: 0 0 var(--espaco-2);
+}
+
+.campo-linha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-2);
+}
+
+.campo textarea {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.mensagem-form {
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  margin: 0 0 var(--espaco-2);
+}
+
+.mensagem-form--erro {
+  color: #ff8b80;
+}
+
+.botao--remover {
+  background: transparent;
+  border: 1px solid var(--cor-acento-2);
+  color: #ff8b80;
+  width: auto;
+}
+
+.botao--remover:hover {
+  background: color-mix(in srgb, var(--cor-acento-2) 20%, transparent);
+}
+
+@media (max-width: 480px) {
+  .campo-linha {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   Rodapé
+   ========================================================= */
+
+.rodape {
+  border-top: 1px solid var(--cor-borda);
+  margin-top: var(--espaco-4);
+}
+
+.rodape__conteudo {
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: var(--espaco-3);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  flex-wrap: wrap;
+  color: var(--cor-texto-muted);
+  font-size: 0.85rem;
+}
+
+.rodape a {
+  color: var(--cor-texto-muted);
+}
+
+.rodape a:hover {
+  color: var(--cor-acento);
+}
+
+/* =========================================================
+   Autenticação (área de conta no cabeçalho + modal de login)
+   ========================================================= */
+
+.area-conta {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.usuario-logado-nome {
+  font-size: 0.9rem;
+  color: var(--cor-texto-muted);
+  white-space: nowrap;
+}
+
+.abas-auth {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: var(--espaco-3);
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.aba-auth {
+  background: transparent;
+  border: none;
+  color: var(--cor-texto-muted);
+  padding: 0.5rem 0.2rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-bottom: 2px solid transparent;
+}
+
+.aba-auth--ativa {
+  color: var(--cor-texto);
+  border-bottom-color: var(--cor-acento);
+  font-weight: 600;
+}
+
+.modal-acoes {
+  display: flex;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-2);
+}
+
+.modal-acoes .botao {
+  width: auto;
+}
+
+dialog#modal-auth {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-3);
+  max-width: 420px;
+  width: 90vw;
+  box-shadow: var(--sombra);
+}
+
+dialog#modal-auth::backdrop,
+dialog#modal-adicionar::backdrop {
+  background: rgba(10, 10, 15, 0.7);
+}
+
+dialog#modal-adicionar {
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-3);
+  max-width: 560px;
+  width: 90vw;
+  box-shadow: var(--sombra);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+/* =========================================================
+   Correções gerais
+   ========================================================= */
+
+/* O atributo hidden precisa vencer regras de display dos botões/cards */
+[hidden] {
+  display: none !important;
+}
+
+/* Todos os tipos de campo de texto seguem o mesmo estilo */
+.campo input[type="email"],
+.campo input[type="password"],
+.campo input[type="number"],
+.campo input[type="url"] {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  font-size: 1rem;
+}
+
+/* =========================================================
+   Pôsteres
+   ========================================================= */
+
+.card-filme__poster {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-filme__imagem {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.modal-poster {
+  float: left;
+  width: 120px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--raio-pequeno);
+  margin: 0 var(--espaco-2) var(--espaco-1) 0;
+}
+
+.modal-acoes {
+  clear: both;
+}
+
+/* =========================================================
+   Busca no TMDB (formulário de adicionar filme)
+   ========================================================= */
+
+.busca-tmdb {
+  display: flex;
+  gap: var(--espaco-1);
+}
+
+.busca-tmdb input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.7rem;
+  background: var(--cor-superficie-2);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  color: var(--cor-texto);
+  font-size: 1rem;
+}
+
+.busca-tmdb .botao {
+  width: auto;
+}
+
+.resultados-tmdb {
+  list-style: none;
+  margin: var(--espaco-1) 0 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+}
+
+.resultado-tmdb {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-texto);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.resultado-tmdb:hover {
+  background: var(--cor-superficie-2);
+}
+
+.resultado-tmdb img,
+.resultado-tmdb__sem-poster {
+  width: 36px;
+  height: 54px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 3px;
+  background: var(--cor-superficie-2);
+}
+
+/* =========================================================
+   Recomendações
+   ========================================================= */
+
+.secao-recomendacoes {
+  padding-bottom: var(--espaco-4);
+}
+
+.secao-recomendacoes h2 {
+  font-family: var(--fonte-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 1.3rem;
+  margin: 0 0 var(--espaco-1);
+}
+
+.grade-recomendacoes {
+  margin-top: var(--espaco-3);
+}
+
+.card-filme__motivo {
+  font-size: 0.78rem;
+  color: var(--cor-acento);
+  margin: 0;
+}
+
+.rodape__tmdb {
+  max-width: 60ch;
+}
+
+/* Paginação do catálogo */
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-2);
+  margin-top: var(--espaco-3);
+  font-family: var(--fonte-mono);
+  font-size: 0.85rem;
+  color: var(--cor-texto-muted);
+}
+
+.paginacao .botao {
+  width: auto;
+}
+
+.paginacao .botao:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

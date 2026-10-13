@@ -1,0 +1,14 @@
+# Segredos / configuração local
+backend/.env
+
+# Logs gerados em tempo de execução
+backend/logs/*.log
+
+# Dependências (se decidir usar Composer futuramente)
+vendor/
+node_modules/
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.swp

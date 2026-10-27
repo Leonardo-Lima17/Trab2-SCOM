@@ -195,6 +195,195 @@
   }
 
   // =========================================================
+  // Gêneros (filtros + formulário de adicionar/editar)
+  // =========================================================
+
+  async function carregarGeneros() {
+    generosCache = await apiFetch("/generos");
+    montarFiltroGeneros();
+    montarGenerosFormAdicionar();
+  }
+
+  function montarFiltroGeneros() {
+    listaGenerosEl.innerHTML = "";
+    generosCache.forEach((genero) => {
+      const id = `genero-${genero.chave}`;
+      const item = document.createElement("li");
+      item.className = "filtro-genero-item";
+      item.innerHTML = `
+        <input type="checkbox" id="${id}" name="genero" value="${genero.chave}" class="filtro-checkbox">
+        <label for="${id}">${genero.nome}</label>
+      `;
+      listaGenerosEl.appendChild(item);
+    });
+  }
+
+  function montarGenerosFormAdicionar() {
+    listaGenerosFormEl.innerHTML = "";
+    generosCache.forEach((genero) => {
+      const id = `add-genero-${genero.chave}`;
+      const item = document.createElement("li");
+      item.className = "filtro-genero-item";
+      item.innerHTML = `
+        <input type="checkbox" id="${id}" name="genero-novo" value="${genero.chave}" class="filtro-checkbox">
+        <label for="${id}">${genero.nome}</label>
+      `;
+      listaGenerosFormEl.appendChild(item);
+    });
+  }
+
+  function nomeDoGenero(chave) {
+    const encontrado = generosCache.find((g) => g.chave === chave);
+    return encontrado ? encontrado.nome : chave;
+  }
+
+  // =========================================================
+  // Filtros, busca, ordenação → API
+  // =========================================================
+
+  function obterFiltrosAtuais() {
+    const generosSelecionados = Array.from(
+      formFiltros.querySelectorAll('input[name="genero"]:checked')
+    ).map((el) => el.value);
+
+    return {
+      busca: campoBusca.value.trim(),
+      genero: generosSelecionados[0] || "", // backend filtra por 1 gênero por vez
+      status: formFiltros.querySelector('input[name="status"]:checked').value,
+      ordenar: campoOrdenar.value,
+    };
+  }
+
+  function montarQueryString(filtros, pagina) {
+    const params = new URLSearchParams();
+    if (filtros.busca) params.set("busca", filtros.busca);
+    if (filtros.genero) params.set("genero", filtros.genero);
+    if (filtros.status) params.set("status", filtros.status);
+    if (filtros.ordenar) params.set("ordenar", filtros.ordenar);
+    params.set("pagina", String(pagina));
+    params.set("por_pagina", String(FILMES_POR_PAGINA));
+    return params.toString();
+  }
+
+  async function carregarERenderizarFilmes() {
+    const filtros = obterFiltrosAtuais();
+    const query = montarQueryString(filtros, paginaAtual);
+
+    try {
+      const resultado = await apiFetch(`/filmes?${query}`);
+            // Se apagou o último filme da página, volta para a anterior
+      if (resultado.itens.length === 0 && paginaAtual > 1) {
+        paginaAtual--;
+        return carregarERenderizarFilmes();
+      }
+
+      renderizarGrade(resultado.itens, resultado.total);
+      atualizarPaginacao(resultado.total);
+    } catch (erro) {
+      contador.textContent = "Não foi possível carregar seus filmes.";
+      console.error(erro);
+    }
+  }
+
+  // =========================================================
+  // Renderização da grade
+  // =========================================================
+
+  function atualizarPaginacao(total) {
+    const totalPaginas = Math.max(1, Math.ceil(total / FILMES_POR_PAGINA));
+    paginacaoEl.hidden = totalPaginas <= 1;
+    infoPagina.textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+    botaoPaginaAnterior.disabled = paginaAtual <= 1;
+    botaoPaginaProxima.disabled = paginaAtual >= totalPaginas;
+  }
+
+  function mudarPagina(delta) {
+    paginaAtual += delta;
+    carregarERenderizarFilmes();
+    secaoCatalogo.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function renderizarGrade(filmes, total) {
+    grid.innerHTML = "";
+
+    contador.textContent =
+      total === 1 ? "1 filme encontrado" : `${total} filmes encontrados`;
+
+    if (filmes.length === 0) {
+      vazio.hidden = false;
+      return;
+    }
+    vazio.hidden = true;
+
+    const fragmento = document.createDocumentFragment();
+
+    filmes.forEach((filme) => {
+      const clone = template.content.cloneNode(true);
+      const artigo = clone.querySelector(".card-filme");
+      const poster = clone.querySelector(".card-filme__poster");
+      const titulo = clone.querySelector(".card-filme__titulo");
+      const meta = clone.querySelector(".card-filme__meta");
+      const badgeStatus = clone.querySelector(".card-filme__badge");
+      const badgePersonalizado = clone.querySelector(".card-filme__badge-personalizado");
+      const botao = clone.querySelector(".card-filme__botao");
+
+      artigo.id = `filme-${filme.id}`;
+      poster.style.setProperty("--cor-poster", filme.cor_tema || "#333952");
+      aplicarPoster(poster, filme.poster_url, filme.titulo);
+
+      titulo.textContent = filme.titulo;
+      meta.textContent = `${filme.ano ?? "?"} · ${filme.diretor}`;
+
+      if (filme.status === "assistido") {
+        badgeStatus.textContent = `Assistido · ${"★".repeat(filme.nota)}${"☆".repeat(5 - filme.nota)}`;
+        badgeStatus.classList.add("card-filme__badge--assistido");
+      } else {
+        badgeStatus.textContent = "Quero assistir";
+        badgeStatus.classList.add("card-filme__badge--pendente");
+      }
+
+      // "Adicionado por você" é reaproveitado como "meu filme" (dono da sessão)
+      if (usuarioAtual && filme.usuario_id === usuarioAtual.id && badgePersonalizado) {
+        badgePersonalizado.hidden = false;
+      }
+
+      botao.setAttribute("aria-label", `Ver detalhes de ${filme.titulo}`);
+      botao.dataset.filmeId = filme.id;
+      botao.addEventListener("click", (evento) => abrirModal(filme, evento.currentTarget));
+
+      fragmento.appendChild(clone);
+    });
+
+    grid.appendChild(fragmento);
+  }
+
+  function obterIniciais(titulo) {
+    return titulo
+      .split(" ")
+      .filter((palavra) => palavra.length > 2)
+      .slice(0, 2)
+      .map((palavra) => palavra[0])
+      .join("")
+      .toUpperCase();
+  }
+
+  // Mostra o pôster por cima das iniciais; se a imagem falhar, as iniciais ficam.
+  function aplicarPoster(elementoPoster, posterUrl, titulo) {
+    elementoPoster.textContent = obterIniciais(titulo);
+    if (!posterUrl) return;
+
+    const img = document.createElement("img");
+    img.className = "card-filme__imagem";
+    img.alt = `Pôster do filme ${titulo}`;
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.referrerPolicy = "no-referrer";
+    img.addEventListener("error", () => img.remove());
+    img.src = posterUrl;
+    elementoPoster.appendChild(img);
+  }
+
+  // =========================================================
   // Login / registro
   // =========================================================
 
@@ -258,3 +447,86 @@
       mensagemRegistrar.className = "mensagem-form mensagem-form--erro";
     }
   }
+
+  // =========================================================
+  // Limpar filtros
+  // =========================================================
+
+  function limparFiltros() {
+    formFiltros.reset();
+    campoBusca.value = "";
+    campoOrdenar.value = "titulo-asc";
+    paginaAtual = 1;
+    carregarERenderizarFilmes();
+    campoBusca.focus();
+  }
+
+  // =========================================================
+  // Eventos
+  // =========================================================
+
+  formFiltros.addEventListener("change", () => {
+    paginaAtual = 1;
+    carregarERenderizarFilmes();
+  });
+  campoBusca.addEventListener("input", () => {
+    paginaAtual = 1;
+    carregarERenderizarFilmes();
+  });
+  campoOrdenar.addEventListener("change", () => {
+    paginaAtual = 1;
+    carregarERenderizarFilmes();
+  });
+  botaoLimpar.addEventListener("click", limparFiltros);
+  botaoPaginaAnterior.addEventListener("click", () => mudarPagina(-1));
+  botaoPaginaProxima.addEventListener("click", () => mudarPagina(1));
+
+  modalFechar.addEventListener("click", fecharModal);
+  modal.addEventListener("cancel", (evento) => {
+    evento.preventDefault();
+    fecharModal();
+  });
+  modal.addEventListener("click", (evento) => {
+    if (evento.target === modal) fecharModal();
+  });
+
+  botaoAbrirAdicionar.addEventListener("click", () => abrirModalAdicionar(null));
+  botaoCancelarAdicionar.addEventListener("click", fecharModalAdicionar);
+  formAdicionar.addEventListener("submit", tratarEnvioFormAdicionar);
+  modalAdicionar.addEventListener("cancel", (evento) => {
+    evento.preventDefault();
+    fecharModalAdicionar();
+  });
+  modalAdicionar.addEventListener("click", (evento) => {
+    if (evento.target === modalAdicionar) fecharModalAdicionar();
+  });
+
+  botaoBuscarTmdb.addEventListener("click", buscarNoTmdb);
+  campoBuscaTmdb.addEventListener("keydown", (evento) => {
+    if (evento.key === "Enter") {
+      evento.preventDefault(); // Enter na busca não deve enviar o formulário
+      buscarNoTmdb();
+    }
+  });
+
+  botaoAbrirLogin.addEventListener("click", abrirModalAuth);
+  botaoFecharAuth.addEventListener("click", fecharModalAuth);
+  modalAuth.addEventListener("cancel", (evento) => {
+    evento.preventDefault();
+    fecharModalAuth();
+  });
+  abaLogin.addEventListener("click", mostrarAbaLogin);
+  abaRegistrar.addEventListener("click", mostrarAbaRegistrar);
+  formLogin.addEventListener("submit", tratarEnvioLogin);
+  formRegistrar.addEventListener("submit", tratarEnvioRegistrar);
+  botaoLogout.addEventListener("click", sair);
+
+  // =========================================================
+  // Inicialização
+  // =========================================================
+
+  painelFiltros.hidden = true;
+  secaoCatalogo.hidden = true;
+  secaoRecomendacoes.hidden = true;
+  verificarSessaoAtual();
+})();

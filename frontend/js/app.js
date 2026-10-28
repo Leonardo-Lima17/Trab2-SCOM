@@ -384,6 +384,179 @@
   }
 
   // =========================================================
+  // Modal de detalhe (+ editar/excluir)
+  // =========================================================
+
+  function abrirModal(filme, elementoOrigem) {
+    elementoQueAbriuModal = elementoOrigem;
+
+    const generosTexto = filme.generos.map(nomeDoGenero).join(", ");
+    const ehDono = usuarioAtual && filme.usuario_id === usuarioAtual.id;
+    const podeExcluir = ehDono || (usuarioAtual && usuarioAtual.papel === "admin");
+
+    modalConteudo.innerHTML = `
+      <h2 id="modal-titulo">${escaparHtml(filme.titulo)}</h2>
+      <p class="modal-meta">${filme.ano ?? "?"} · ${escaparHtml(filme.diretor)} · ${filme.duracao ?? "?"} min</p>
+      <p class="modal-generos"><strong>Gêneros:</strong> ${escaparHtml(generosTexto)}</p>
+      <p class="modal-sinopse">${escaparHtml(filme.sinopse || "Sem sinopse cadastrada.")}</p>
+      <p class="modal-status">${
+        filme.status === "assistido"
+          ? `Avaliação pessoal: ${"★".repeat(filme.nota)}${"☆".repeat(5 - filme.nota)}`
+          : "Ainda não assistido — está na lista de interesse."
+      }</p>
+      <div class="modal-acoes">
+        ${ehDono ? `<button type="button" class="botao" id="botao-editar-filme">Editar</button>` : ""}
+        ${podeExcluir ? `<button type="button" class="botao botao--remover" id="botao-remover-filme">Excluir</button>` : ""}
+      </div>
+    `;
+
+    if (filme.poster_url) {
+      const img = document.createElement("img");
+      img.className = "modal-poster";
+      img.alt = `Pôster do filme ${filme.titulo}`;
+      img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", () => img.remove());
+      img.src = filme.poster_url;
+      modalConteudo.prepend(img);
+    }
+
+    if (ehDono) {
+      document.getElementById("botao-editar-filme").addEventListener("click", () => {
+        fecharModal();
+        abrirModalAdicionar(filme);
+      });
+    }
+
+    if (podeExcluir) {
+      document.getElementById("botao-remover-filme").addEventListener("click", async () => {
+        try {
+          await apiFetch(`/filmes/${filme.id}`, { method: "DELETE" });
+          fecharModal();
+          await carregarERenderizarFilmes();
+          carregarRecomendacoes();
+        } catch (erro) {
+          alert(erro.message);
+        }
+      });
+    }
+
+    modal.showModal();
+    modalFechar.focus();
+  }
+
+  function fecharModal() {
+    modal.close();
+    if (elementoQueAbriuModal) {
+      elementoQueAbriuModal.focus();
+    }
+  }
+
+  function escaparHtml(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto ?? "";
+    return div.innerHTML;
+  }
+
+  // =========================================================
+  // Formulário "Adicionar / editar filme"
+  // =========================================================
+
+  function abrirModalAdicionar(filmeParaEditar = null, sugestao = null) {
+    formAdicionar.reset();
+    mensagemAdicionar.textContent = "";
+    mensagemTmdb.textContent = "";
+    resultadosTmdb.innerHTML = "";
+    resultadosTmdb.hidden = true;
+    campoBuscaTmdb.value = "";
+    document.getElementById("novo-poster").value = "";
+    document.getElementById("novo-tmdb-id").value = "";
+    montarGenerosFormAdicionar();
+
+    if (filmeParaEditar) {
+      filmeEmEdicaoId = filmeParaEditar.id;
+      tituloModalAdicionar.textContent = "Editar filme";
+      botaoSalvarFilme.textContent = "Salvar alterações";
+
+      document.getElementById("novo-titulo").value = filmeParaEditar.titulo;
+      document.getElementById("novo-ano").value = filmeParaEditar.ano ?? "";
+      document.getElementById("novo-duracao").value = filmeParaEditar.duracao ?? "";
+      document.getElementById("novo-diretor").value = filmeParaEditar.diretor ?? "";
+      document.getElementById("novo-nota").value = String(filmeParaEditar.nota ?? 0);
+      document.getElementById("novo-sinopse").value = filmeParaEditar.sinopse ?? "";
+      document.getElementById("novo-poster").value = filmeParaEditar.poster_url ?? "";
+      document.getElementById("novo-tmdb-id").value = filmeParaEditar.tmdb_id ?? "";
+
+      const statusInput = formAdicionar.querySelector(
+        `input[name="status-novo"][value="${filmeParaEditar.status}"]`
+      );
+      if (statusInput) statusInput.checked = true;
+
+      filmeParaEditar.generos.forEach((chave) => {
+        const checkbox = document.getElementById(`add-genero-${chave}`);
+        if (checkbox) checkbox.checked = true;
+      });
+    } else {
+      filmeEmEdicaoId = null;
+      tituloModalAdicionar.textContent = "Adicionar filme à minha lista";
+      botaoSalvarFilme.textContent = "Salvar filme";
+
+      if (sugestao) {
+        // Veio de uma recomendação: já entra como "quero assistir"
+        preencherFormularioComFilme(sugestao);
+        document.getElementById("novo-status-pendente").checked = true;
+      }
+    }
+
+    modalAdicionar.showModal();
+    document.getElementById("novo-titulo").focus();
+  }
+
+  function fecharModalAdicionar() {
+    modalAdicionar.close();
+    filmeEmEdicaoId = null;
+    botaoAbrirAdicionar.focus();
+  }
+
+  async function tratarEnvioFormAdicionar(evento) {
+    evento.preventDefault();
+    mensagemAdicionar.textContent = "";
+
+    const generos = Array.from(
+      formAdicionar.querySelectorAll('input[name="genero-novo"]:checked')
+    ).map((el) => el.value);
+
+    const status = formAdicionar.querySelector('input[name="status-novo"]:checked').value;
+
+    const dados = {
+      titulo: document.getElementById("novo-titulo").value.trim(),
+      ano: document.getElementById("novo-ano").value || null,
+      diretor: document.getElementById("novo-diretor").value.trim(),
+      duracao: document.getElementById("novo-duracao").value || null,
+      nota: status === "assistido" ? document.getElementById("novo-nota").value : 0,
+      status,
+      sinopse: document.getElementById("novo-sinopse").value.trim(),
+      poster_url: document.getElementById("novo-poster").value.trim() || null,
+      tmdb_id: document.getElementById("novo-tmdb-id").value || null,
+      generos,
+    };
+
+    try {
+      if (filmeEmEdicaoId) {
+        await apiFetch(`/filmes/${filmeEmEdicaoId}`, { method: "PUT", corpo: dados });
+      } else {
+        await apiFetch("/filmes", { method: "POST", corpo: dados });
+      }
+      fecharModalAdicionar();
+      await carregarERenderizarFilmes();
+      carregarRecomendacoes();
+    } catch (erro) {
+      const primeiroErroDeCampo = Object.values(erro.campos || {})[0];
+      mensagemAdicionar.textContent = primeiroErroDeCampo || erro.message;
+      mensagemAdicionar.className = "mensagem-form mensagem-form--erro";
+    }
+  }
+
+  // =========================================================
   // Login / registro
   // =========================================================
 

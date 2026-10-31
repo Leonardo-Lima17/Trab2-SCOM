@@ -557,6 +557,129 @@
   }
 
   // =========================================================
+  // Busca no TMDB (pôster, sinopse, ano e gêneros)
+  // =========================================================
+
+  function preencherFormularioComFilme(item) {
+    document.getElementById("novo-titulo").value = item.titulo ?? "";
+    document.getElementById("novo-ano").value = item.ano ?? "";
+    if (item.sinopse) {
+      document.getElementById("novo-sinopse").value = item.sinopse;
+    }
+    document.getElementById("novo-poster").value = item.poster_url ?? "";
+    document.getElementById("novo-tmdb-id").value = item.tmdb_id ?? "";
+
+    (item.generos || []).forEach((chave) => {
+      const checkbox = document.getElementById(`add-genero-${chave}`);
+      if (checkbox) checkbox.checked = true;
+    });
+  }
+
+  async function buscarNoTmdb() {
+    const termo = campoBuscaTmdb.value.trim();
+    mensagemTmdb.textContent = "";
+    mensagemTmdb.className = "mensagem-form";
+    resultadosTmdb.innerHTML = "";
+    resultadosTmdb.hidden = true;
+
+    if (termo.length < 2) {
+      mensagemTmdb.textContent = "Digite pelo menos 2 caracteres.";
+      return;
+    }
+
+    botaoBuscarTmdb.disabled = true;
+    try {
+      const itens = await apiFetch(`/tmdb/buscar?q=${encodeURIComponent(termo)}`);
+
+      if (itens.length === 0) {
+        mensagemTmdb.textContent = "Nenhum filme encontrado. Você pode preencher manualmente.";
+        return;
+      }
+
+      itens.forEach((item) => {
+        const li = document.createElement("li");
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "resultado-tmdb";
+
+        if (item.poster_url) {
+          const img = document.createElement("img");
+          img.alt = "";
+          img.src = item.poster_url;
+          img.referrerPolicy = "no-referrer";
+          botao.appendChild(img);
+        } else {
+          const vazio = document.createElement("span");
+          vazio.className = "resultado-tmdb__sem-poster";
+          botao.appendChild(vazio);
+        }
+
+        const texto = document.createElement("span");
+        texto.textContent = item.ano ? `${item.titulo} (${item.ano})` : item.titulo;
+        botao.appendChild(texto);
+
+        botao.addEventListener("click", () => {
+          preencherFormularioComFilme(item);
+          resultadosTmdb.hidden = true;
+          mensagemTmdb.textContent = "Dados preenchidos. Confira e escolha o status.";
+        });
+
+        li.appendChild(botao);
+        resultadosTmdb.appendChild(li);
+      });
+      resultadosTmdb.hidden = false;
+    } catch (erro) {
+      mensagemTmdb.textContent = erro.message;
+      mensagemTmdb.className = "mensagem-form mensagem-form--erro";
+    } finally {
+      botaoBuscarTmdb.disabled = false;
+    }
+  }
+
+  // =========================================================
+  // Recomendações
+  // =========================================================
+
+  async function carregarRecomendacoes() {
+    try {
+      const dados = await apiFetch("/recomendacoes");
+      renderizarRecomendacoes(dados.itens || []);
+    } catch (erro) {
+      secaoRecomendacoes.hidden = true;
+      console.error("Recomendações indisponíveis:", erro);
+    }
+  }
+
+  function renderizarRecomendacoes(itens) {
+    listaRecomendacoes.innerHTML = "";
+
+    if (itens.length === 0) {
+      secaoRecomendacoes.hidden = true;
+      return;
+    }
+
+    const fragmento = document.createDocumentFragment();
+
+    itens.forEach((item) => {
+      const clone = templateRecomendacao.content.cloneNode(true);
+
+      aplicarPoster(clone.querySelector(".card-filme__poster"), item.poster_url, item.titulo);
+      clone.querySelector(".card-filme__titulo").textContent = item.titulo;
+      clone.querySelector(".card-filme__meta").textContent = item.ano ? String(item.ano) : "";
+      clone.querySelector(".card-filme__motivo").textContent = item.motivo || "";
+
+      const botao = clone.querySelector(".card-filme__botao");
+      botao.setAttribute("aria-label", `Adicionar ${item.titulo} à minha lista`);
+      botao.addEventListener("click", () => abrirModalAdicionar(null, item));
+
+      fragmento.appendChild(clone);
+    });
+
+    listaRecomendacoes.appendChild(fragmento);
+    secaoRecomendacoes.hidden = false;
+  }
+
+  // =========================================================
   // Login / registro
   // =========================================================
 

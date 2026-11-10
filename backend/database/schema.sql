@@ -100,13 +100,11 @@ INSERT INTO generos (chave, nome) VALUES
 
 -- ---------------------------------------------------------
 -- Seed: usuário administrador padrão
--- Senha em texto claro: admin123  (troque após o primeiro login)
--- Hash gerado com password_hash('admin123', PASSWORD_BCRYPT)
+-- A senha NÃO é definida aqui. O valor abaixo é inválido de propósito
+-- e não corresponde a nenhuma senha. Defina a senha real depois:
+--   php backend/scripts/gerar_hash.php "sua_senha"
+--   UPDATE usuarios SET senha_hash = '<hash gerada>'
+--     WHERE email = 'admin@cinearquivo.local';
 -- ---------------------------------------------------------
 INSERT INTO usuarios (nome, email, senha_hash, papel) VALUES
-  ('Administrador', 'admin@cinearquivo.local',
-   '$2y$10$2q7t3s9zI0i0m7bQxQeOa.Zt8Vd1uYqQbYQwq0kFhQxG8x0y0Xy1a', 'admin');
-
--- Observação: a hash acima é apenas um placeholder de exemplo.
--- Rode backend/scripts/gerar_hash.php (incluso) para gerar a hash real
--- de 'admin123' na sua instalação de PHP e substitua o valor antes do uso.
+  ('Administrador', 'admin@cinearquivo.local', '!senha-nao-definida', 'admin');

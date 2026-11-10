@@ -181,6 +181,9 @@
     avisoLogin.hidden = true;
     painelFiltros.hidden = false;
     secaoCatalogo.hidden = false;
+    const ehAdmin = usuarioAtual.papel === "admin";
+    document.getElementById("campo-admin-todos").hidden = !ehAdmin;
+    if (!ehAdmin) document.getElementById("filtro-todos").checked = false;
   }
 
   function mostrarEstadoDeslogado() {
@@ -251,6 +254,7 @@
       genero: generosSelecionados[0] || "", // backend filtra por 1 gênero por vez
       status: formFiltros.querySelector('input[name="status"]:checked').value,
       ordenar: campoOrdenar.value,
+      todos: document.getElementById("filtro-todos").checked,
     };
   }
 
@@ -260,6 +264,7 @@
     if (filtros.genero) params.set("genero", filtros.genero);
     if (filtros.status) params.set("status", filtros.status);
     if (filtros.ordenar) params.set("ordenar", filtros.ordenar);
+    if (filtros.todos) params.set("todos", "1");
     params.set("pagina", String(pagina));
     params.set("por_pagina", String(FILMES_POR_PAGINA));
     return params.toString();
@@ -333,6 +338,10 @@
 
       titulo.textContent = filme.titulo;
       meta.textContent = `${filme.ano ?? "?"} · ${filme.diretor}`;
+
+      if (usuarioAtual && usuarioAtual.papel === "admin" && filme.usuario_id !== usuarioAtual.id) {
+        meta.textContent += ` · Usuário #${filme.usuario_id}`;
+      }
 
       if (filme.status === "assistido") {
         badgeStatus.textContent = `Assistido · ${"★".repeat(filme.nota)}${"☆".repeat(5 - filme.nota)}`;
